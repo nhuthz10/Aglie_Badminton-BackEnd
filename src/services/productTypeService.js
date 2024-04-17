@@ -36,6 +36,50 @@ let checkProductTypeName = (name) => {
   });
 };
 
+let createNewProductTypeService = (data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!data.productTypeId || !data.productTypeName) {
+        resolve({
+          errCode: 1,
+          message: "Missing required parameter!!!",
+        });
+      } else {
+        let checkExistId = await checkProductTypeId(data.productTypeId);
+        let checkExistName = await checkProductTypeName(data.productTypeName);
+        if (checkExistId) {
+          resolve({
+            errCode: 2,
+            message: "ProductTypeId is already exist",
+          });
+        } else if (checkExistName) {
+          resolve({
+            errCode: 3,
+            message: "ProductTypeName is already exist",
+          });
+        } else {
+          await db.Product_Type.create({
+            productTypeId: data.productTypeId,
+            productTypeName: data.productTypeName,
+          });
+          resolve({
+            errCode: 0,
+            message: "Create a productType succeed",
+          });
+        }
+      }
+    } catch (error) {
+      if (error.name === "SequelizeForeignKeyConstraintError") {
+        resolve({
+          errCode: -2,
+          message: "Error foreign key",
+        });
+      } else {
+        reject(error);
+      }
+    }
+  });
+};
 
 //Pagination
 let getAllProductTypeService = (limit, page, sort, name, pagination) => {
@@ -103,5 +147,6 @@ let getAllProductTypeService = (limit, page, sort, name, pagination) => {
 // };
 
 module.exports = {
+  createNewProductTypeService,
   getAllProductTypeService,
 };

@@ -3,6 +3,100 @@ require("dotenv").config();
 const cloudinary = require("cloudinary").v2;
 import { Op } from "sequelize";
 
+let checkPeoductId = (id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let product = await db.Product.findOne({
+        where: { productId: id },
+      });
+      if (product) {
+        resolve(true);
+      } else {
+        resolve(false);
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+let checkProductName = (name) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let product = await db.Product.findOne({
+        where: { name: name },
+      });
+      if (product) {
+        resolve(true);
+      } else {
+        resolve(false);
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+let createNewProductService = (data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (
+        !data.productId ||
+        !data.brandId ||
+        !data.productTypeId ||
+        !data.name ||
+        !data.price ||
+        !data.imageUrl
+      ) {
+        resolve({
+          errCode: 1,
+          message: "Missing required parameter!!!",
+        });
+      } else {
+        let checkExistId = await checkPeoductId(data.productId);
+        let checkExistName = await checkProductName(data.name);
+        if (checkExistId) {
+          resolve({
+            errCode: 2,
+            message: "ProductId is already exist",
+          });
+        } else if (checkExistName) {
+          resolve({
+            errCode: 3,
+            message: "ProductName is already exist",
+          });
+        } else {
+          await db.Product.create({
+            productId: data.productId,
+            brandId: data.brandId,
+            productTypeId: data.productTypeId,
+            name: data.name,
+            price: data.price,
+            image: data.imageUrl,
+            imageId: data.imageId,
+            descriptionContent: data.descriptionContent,
+            descriptionHTML: data.descriptionHTML,
+          });
+          resolve({
+            errCode: 0,
+            message: "Create a product succeed",
+          });
+        }
+      }
+    } catch (error) {
+      if (error.name === "SequelizeForeignKeyConstraintError") {
+        console.log(error);
+        resolve({
+          errCode: -2,
+          message: "Error foreign key",
+        });
+      } else {
+        reject(error);
+      }
+    }
+  });
+};
+
 let getProductService = (productId) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -88,5 +182,6 @@ let getProductService = (productId) => {
 };
 
 module.exports = {
+  createNewProductService,
   getProductService,
 };

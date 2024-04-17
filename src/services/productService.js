@@ -85,15 +85,5 @@ let getAllProductService = (limit, page, sort, name) => {
 };
 
 module.exports = {
-  handleGetNameProductService,
-  createNewProductService,
-  deleteProductService,
-  updateProductService,
-  getAllProductService,
-  getProductService,
-  getAllProductOfTheProductTypeService,
-  getPaypalIdService,
-  getAllProuctFeedbackService,
-  getAllProductSaleOffService,
-  getAllProductFavouriteService,
+  getAllProductService
 };

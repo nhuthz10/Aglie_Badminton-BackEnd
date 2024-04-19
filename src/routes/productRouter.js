@@ -7,6 +7,11 @@ router.post(
   uploadCloud.single("image"),
   productController.handleCreateNewProduct
 );
+router.put(
+  "/update-product",
+  uploadCloud.single("image"),
+  productController.handleUpdateProduct
+);
 router.get("/get-product", productController.getProduct);
 
 export default router;

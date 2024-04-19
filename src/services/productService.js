@@ -97,6 +97,114 @@ let createNewProductService = (data) => {
   });
 };
 
+let checkProductIdUpdate = (productId, id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let products = await db.Product.findAll();
+      products = products.filter((item) => item.id !== +id);
+      let result;
+      for (let i = 0; i < products.length; i++) {
+        if (products[i].productId === productId) {
+          result = true;
+          break;
+        } else {
+          result = false;
+        }
+      }
+      resolve(result);
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+let checkProductNameUpdate = (productName, id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let products = await db.Product.findAll();
+      products = products.filter((item) => item.id !== +id);
+      let result;
+      for (let i = 0; i < products.length; i++) {
+        if (products[i].name === productName) {
+          result = true;
+          break;
+        } else {
+          result = false;
+        }
+      }
+      resolve(result);
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+let updateProductService = (data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (
+        !data.productId ||
+        !data.brandId ||
+        !data.productTypeId ||
+        !data.name ||
+        !data.price ||
+        !data.id
+      ) {
+        resolve({
+          errCode: 1,
+          message: "Missing required parameter!!!",
+        });
+      } else {
+        let checkExistId = await checkProductIdUpdate(data.productId, data.id);
+        let checkExistName = await checkProductNameUpdate(data.name, data.id);
+        if (checkExistId) {
+          resolve({
+            errCode: 2,
+            message: "ProductId is already exist",
+          });
+        } else if (checkExistName) {
+          resolve({
+            errCode: 3,
+            message: "ProductName is already exist",
+          });
+        } else {
+          let product = await db.Product.findOne({
+            where: { id: data.id },
+            raw: false,
+          });
+          if (product) {
+            product.productId = data.productId;
+            product.brandId = data.brandId;
+            product.productTypeId = data.productTypeId;
+            product.name = data.name;
+            product.price = data.price;
+            product.discount = data.discount;
+            product.descriptionContent = data.descriptionContent;
+            product.descriptionHTML = data.descriptionHTML;
+            if (data.imageUrl && data.imageId) {
+              cloudinary.uploader.destroy(product.imageId);
+              product.image = data.imageUrl;
+              product.imageId = data.imageId;
+            }
+            await product.save();
+            resolve({
+              errCode: 0,
+              message: "Update product succeed",
+            });
+          } else {
+            resolve({
+              errCode: 4,
+              message: "Product isn't exist",
+            });
+          }
+        }
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 let getProductService = (productId) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -183,5 +291,6 @@ let getProductService = (productId) => {
 
 module.exports = {
   createNewProductService,
+  updateProductService,
   getProductService,
 };

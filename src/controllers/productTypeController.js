@@ -17,6 +17,20 @@ let handleCreateNewProductType = async (req, res) => {
   }
 };
 
+let handleUpdateProductType = async (req, res) => {
+  try {
+    let message = await productTypeService.updateProductTypeService(req.body);
+    if (message.errCode === 0) return res.status(200).json(message);
+    else return res.status(400).json(message);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      errCode: -1,
+      message: "Error form the server!!!",
+    });
+  }
+};
+
 let handleGetAllProductType = async (req, res) => {
   try {
     let { limit, page, sort, name, pagination } = req.query;
@@ -40,6 +54,7 @@ let handleGetAllProductType = async (req, res) => {
 
 module.exports = {
   handleCreateNewProductType,
+  handleUpdateProductType,
   handleGetAllProductType
 };
 

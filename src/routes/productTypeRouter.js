@@ -6,6 +6,12 @@ router.post(
   "/create-product-type",
   productTypeController.handleCreateNewProductType
 );
+
+router.put(
+  "/update-product-type",
+  productTypeController.handleUpdateProductType
+);
+
 router.get(
   "/get-all-product-type",
   productTypeController.handleGetAllProductType

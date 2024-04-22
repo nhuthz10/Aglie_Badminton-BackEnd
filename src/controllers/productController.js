@@ -1,7 +1,4 @@
 import productService from "../services/productService";
-const cloudinary = require("cloudinary").v2;
-
-
 
 let handleGetAllProduct = async (req, res) => {
   try {
@@ -75,3 +72,9 @@ let getProduct = async (req, res) => {
     });
   }
 };
+
+module.exports = {
+  handleGetAllProduct,
+  getProduct,
+  handleGetAllProductOfTheProductType,
+}

@@ -28,6 +28,42 @@ let handleCreateNewProduct = async (req, res) => {
   }
 };
 
+let deleteProductService = (id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!id) {
+        resolve({
+          errCode: 1,
+          message: "Missing required parameter!!!",
+        });
+      } else {
+        let product = await db.Product.findOne({
+          where: { id: id },
+        });
+        if (!product) {
+          resolve({
+            errCode: 2,
+            message: "Product isn't exist",
+          });
+        } else {
+          if (product.imageId && product.image) {
+            cloudinary.uploader.destroy(product.imageId);
+          }
+          await db.Product.destroy({
+            where: { id: id },
+          });
+          resolve({
+            errCode: 0,
+            message: "Product brand succeed",
+          });
+        }
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 let handleUpdateProduct = async (req, res) => {
   try {
     let data = req.body;
@@ -73,5 +109,6 @@ let getProduct = async (req, res) => {
 module.exports = {
   handleCreateNewProduct,
   handleUpdateProduct,
+  deleteProductService,
   getProduct,
 };

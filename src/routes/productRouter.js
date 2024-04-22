@@ -13,5 +13,6 @@ router.put(
   productController.handleUpdateProduct
 );
 router.get("/get-product", productController.getProduct);
+router.delete("/delete-product", productController.handleDeleteProduct);
 
 export default router;

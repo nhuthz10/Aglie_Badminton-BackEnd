@@ -81,6 +81,60 @@ let createNewProductTypeService = (data) => {
   });
 };
 
+let updateProductTypeService = (data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!data.productTypeId || !data.productTypeName || !data.id) {
+        resolve({
+          errCode: 1,
+          message: "Missing required parameter!!!",
+        });
+      } else {
+        let checkExistId = await checkProductTypeIdUpdate(
+          data.productTypeId,
+          data.id
+        );
+        let checkExistName = await checkProductTypeNameUpdate(
+          data.productTypeName,
+          data.id
+        );
+        if (checkExistId) {
+          resolve({
+            errCode: 2,
+            message: "ProductTypeId is already exist",
+          });
+        } else if (checkExistName) {
+          resolve({
+            errCode: 3,
+            message: "ProductTypeName is already exist",
+          });
+        } else {
+          let productType = await db.Product_Type.findOne({
+            where: { id: data.id },
+            raw: false,
+          });
+          if (productType) {
+            productType.productTypeId = data.productTypeId;
+            productType.productTypeName = data.productTypeName;
+
+            await productType.save();
+            resolve({
+              errCode: 0,
+              message: "Update product type succeed",
+            });
+          } else {
+            resolve({
+              errCode: 4,
+              message: "Product type isn't exist",
+            });
+          }
+        }
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
 //Pagination
 let getAllProductTypeService = (limit, page, sort, name, pagination) => {
   return new Promise(async (resolve, reject) => {
@@ -148,5 +202,6 @@ let getAllProductTypeService = (limit, page, sort, name, pagination) => {
 
 module.exports = {
   createNewProductTypeService,
+  updateProductTypeService,
   getAllProductTypeService,
 };

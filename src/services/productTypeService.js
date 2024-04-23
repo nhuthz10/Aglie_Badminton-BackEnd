@@ -81,6 +81,81 @@ let createNewProductTypeService = (data) => {
   });
 };
 
+let deleteProductTypeService = (id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!id) {
+        resolve({
+          errCode: 1,
+          message: "Missing required parameter!!!",
+        });
+      } else {
+        let productType = await db.Product_Type.findOne({
+          where: { id: id },
+        });
+        if (!productType) {
+          resolve({
+            errCode: 2,
+            message: "ProductType isn't exist",
+          });
+        } else {
+          await db.Product_Type.destroy({
+            where: { id: id },
+          });
+          resolve({
+            errCode: 0,
+            message: "Delete productType succeed",
+          });
+        }
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+let checkProductTypeIdUpdate = (productTypeId, id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let productType = await db.Product_Type.findAll();
+      productType = productType.filter((item) => item.id !== +id);
+      let result;
+      for (let i = 0; i < productType.length; i++) {
+        if (productType[i].productTypeId === productTypeId) {
+          result = true;
+          break;
+        } else {
+          result = false;
+        }
+      }
+      resolve(result);
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+let checkProductTypeNameUpdate = (productTypeName, id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let productType = await db.Product_Type.findAll();
+      productType = productType.filter((item) => item.id !== +id);
+      let result;
+      for (let i = 0; i < productType.length; i++) {
+        if (productType[i].productTypeName === productTypeName) {
+          result = true;
+          break;
+        } else {
+          result = false;
+        }
+      }
+      resolve(result);
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 let updateProductTypeService = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -135,6 +210,7 @@ let updateProductTypeService = (data) => {
     }
   });
 };
+
 //Pagination
 let getAllProductTypeService = (limit, page, sort, name, pagination) => {
   return new Promise(async (resolve, reject) => {
@@ -202,6 +278,7 @@ let getAllProductTypeService = (limit, page, sort, name, pagination) => {
 
 module.exports = {
   createNewProductTypeService,
+  deleteProductTypeService,
   updateProductTypeService,
   getAllProductTypeService,
 };

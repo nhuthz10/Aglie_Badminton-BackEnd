@@ -3,80 +3,83 @@ require("dotenv").config();
 const cloudinary = require("cloudinary").v2;
 import { Op } from "sequelize";
 
-//Pagination
-let getAllProductService = (limit, page, sort, name) => {
   return new Promise(async (resolve, reject) => {
     try {
-      let filter = {};
-      if (!limit) limit = +process.env.LIMIT_MANAGE;
-      if (!page) page = 1;
-      if (!sort) sort = ["id", "DESC"];
-      name === "undefined" || name === "null" || name === ""
-        ? (name = undefined)
-        : name;
-      if (name) filter.name = { [Op.substring]: name };
-      let skip = (page - 1) * limit;
-      const { count, rows } = await db.Product.findAndCountAll({
-        limit: limit,
-        offset: skip,
-        order: [sort],
-        where: filter,
-        attributes: {
-          exclude: [
-            "createdAt",
-            "updatedAt",
-            "imageId",
-            "brandId",
-            "productTypeId",
+      if (!productId) {
+        resolve({
+          errCode: 1,
+          message: "Missing required parameter!!!",
+        });
+      } else {
+        let product = await db.Product.findOne({
+          where: { productId: productId },
+          attributes: {
+            exclude: [
+              "createdAt",
+              "updatedAt",
+              "id",
+              "brandId",
+              "productTypeId",
+              "imageId",
+              "descriptionContent",
+            ],
+          },
+          include: [
+            {
+              model: db.Product_Type,
+              as: "productTypeData",
+              attributes: ["productTypeId", "productTypeName"],
+            },
+            {
+              model: db.Brand,
+              as: "brandData",
+              attributes: ["brandId", "brandName"],
+            },
           ],
-        },
-        include: [
-          {
-            model: db.Product_Type,
-            as: "productTypeData",
-            attributes: ["productTypeId", "productTypeName"],
-          },
-          {
-            model: db.Brand,
-            as: "brandData",
-            attributes: ["brandId", "brandName"],
-          },
-        ],
-        raw: true,
-        nest: true,
-      });
+          raw: true,
+          nest: true,
+        });
+        let sizeProducts = await db.Product_Size.findAll({
+          where: { productId: productId },
+          attributes: ["quantity", "sold"],
+          order: [["id", "ASC"]],
+          include: [
+            {
+              model: db.Size,
+              as: "SizeData",
+              attributes: ["sizeId", "sizeName"],
+            },
+          ],
+          raw: true,
+          nest: true,
+        });
+        sizeProducts = sizeProducts.map((size) => {
+          return { quantity: size.quantity, sold: size.sold, ...size.SizeData };
+        });
+        product.SizeData = sizeProducts;
 
-      let result = await Promise.all(
-        rows.map(async (item) => {
-          item.rating = await db.Feedback.findAll({
-            where: { productId: item.productId },
-            attributes: ["rating"],
-          });
-          return item;
-        })
-      );
+        product.rating = await db.Feedback.findAll({
+          where: { productId: product.productId },
+          attributes: ["rating"],
+        });
 
-      result = result.map((item) => {
-        if (item.rating.length > 0) {
-          let sumRating = item.rating.reduce(
+        if (product.rating.length > 0) {
+          let sumRating = product.rating.reduce(
             (acc, current) => current.rating + acc,
             0
           );
-          let avg = sumRating / item.rating.length;
-          item.rating = +avg.toFixed(1);
+          let avg = sumRating / product.rating.length;
+          product.rating = +avg.toFixed(1);
         } else {
-          item.rating = 0;
+          product.rating = 0;
         }
-        return item;
-      });
 
-      resolve({
-        errCode: 0,
-        total: count,
-        currentPage: page,
-        totalPage: Math.ceil(count / limit),
-        data: result,
-      });
+        resolve({
+          errCode: 0,
+          data: product,
+          message: "Get product succeed",
+        });
+      }
     } catch (error) {
       reject(error);
     }
@@ -272,5 +275,4 @@ let getProductService = (productId) => {
   });
 };
 module.exports = {
-  getAllProductService
 };

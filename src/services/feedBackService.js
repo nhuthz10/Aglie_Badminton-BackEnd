@@ -1,5 +1,49 @@
 import db from "../models/index";
+import { Op } from "sequelize";
 require("dotenv").config();
+
+let createNewFeedBackService = (data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!data.userId || !data.productId) {
+        resolve({
+          errCode: 1,
+          message: "Missing required parameter!!!",
+        });
+      } else {
+        await db.Feedback.create({
+          userId: data.userId,
+          productId: data.productId,
+          description: data.description,
+          rating: data.rating,
+        });
+        let product = await db.Order_History.findOne({
+          where: {
+            orderId: data.orderId,
+            productId: data.productId,
+            sizeId: data.sizeId,
+          },
+          raw: false,
+        });
+        product.statusFeedback = 1;
+        await product.save();
+        resolve({
+          errCode: 0,
+          message: "Create a feedback succeed",
+        });
+      }
+    } catch (error) {
+      if (error.name === "SequelizeForeignKeyConstraintError") {
+        resolve({
+          errCode: -2,
+          message: "Error foreign key",
+        });
+      } else {
+        reject(error);
+      }
+    }
+  });
+};
 
 let deleteFeedbackService = (id) => {
   return new Promise(async (resolve, reject) => {
@@ -119,6 +163,7 @@ let getAllFeedbackService = (productId) => {
 };
 
 module.exports = {
+  createNewFeedBackService,
   getAllFeedbackService,
   updateFeedbackService,
   deleteFeedbackService,

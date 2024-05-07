@@ -24,3 +24,4 @@ router.get("/get-all-user", userController.handleGetAllUser);
 router.get("/get-all-role", userController.handleGetAllRole);
 
 export default router;
+

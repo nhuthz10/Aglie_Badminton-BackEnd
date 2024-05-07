@@ -1,7 +1,7 @@
 import express from "express";
 import productController from "../controllers/productController";
+import uploadCloud from "../middlewares/uploadImg";
 let router = express.Router();
-
 router.post(
   "/create-product",
   uploadCloud.single("image"),

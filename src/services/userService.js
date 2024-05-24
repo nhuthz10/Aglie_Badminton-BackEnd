@@ -376,60 +376,6 @@ let changePasswordService = (data) => {
   });
 };
 
-let changePasswordProfileService = (data) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      if (!data.id || !data.currentPassword || !data.newPassword) {
-        resolve({
-          errCode: 1,
-          message: "Missing required parameter!!!",
-        });
-      } else {
-        let user = await db.User.findOne({
-          where: { id: data.id },
-          raw: false,
-        });
-        if (!user) {
-          resolve({
-            errCode: 2,
-            message: "User not found",
-          });
-        } else {
-          let check = await bcrypt.compareSync(
-            data.currentPassword,
-            user.password
-          );
-          if (check) {
-            if (data.currentPassword === data.newPassword) {
-              resolve({
-                errCode: 4,
-                message: "The new password matches the current password",
-              });
-            } else {
-              let hashPasswordFromBcrypt = await hashUserPassword(
-                data.newPassword
-              );
-              user.password = hashPasswordFromBcrypt;
-              await user.save();
-              resolve({
-                errCode: 0,
-                message: "Change password succeed",
-              });
-            }
-          } else {
-            resolve({
-              errCode: 3,
-              message: "Current password incorrect",
-            });
-          }
-        }
-      }
-    } catch (error) {
-      reject(error);
-    }
-  });
-};
-
 let deleteUserService = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -774,7 +720,6 @@ module.exports = {
   updateUserService,
   getUserService,
   getAllUser,
-  changePasswordProfileService,
   getAllRoleService,
   registerService,
   autherRegister,

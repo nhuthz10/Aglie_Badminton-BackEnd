@@ -94,21 +94,6 @@ let handleChangePassword = async (req, res) => {
   }
 };
 
-let handleChangeProfilePassword = async (req, res) => {
-  try {
-    let data = req.body;
-    let message = await userService.changePasswordProfileService(data);
-    if (message.errCode === 0) return res.status(200).json(message);
-    else return res.status(400).json(message);
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      errCode: -1,
-      message: "Error from the server!!!",
-    });
-  }
-};
-
 let handleDeleteUser = async (req, res) => {
   try {
     let id = req.query.id;
@@ -206,6 +191,5 @@ module.exports = {
   handleUpdateUser,
   handleGetUser,
   handleGetAllUser,
-  handleChangeProfilePassword,
   handleGetAllRole,
 };

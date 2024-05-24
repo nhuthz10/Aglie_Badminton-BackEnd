@@ -15,13 +15,8 @@ router.put(
 );
 router.post("/send-otp-code", userController.handleSendOtpCode);
 router.put("/change-password", userController.handleChangePassword);
-router.put(
-  "/change-password-profile",
-  userController.handleChangeProfilePassword
-);
 router.get("/get-user", userController.handleGetUser);
 router.get("/get-all-user", userController.handleGetAllUser);
 router.get("/get-all-role", userController.handleGetAllRole);
 
 export default router;
-
